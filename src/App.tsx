@@ -1,0 +1,175 @@
+import React, { useState, useEffect } from 'react';
+import Sidebar from './components/Sidebar';
+import Dashboard from './components/Dashboard';
+import LogFeed from './components/LogFeed';
+import AlertsPanel from './components/AlertsPanel';
+import IncidentDetail from './components/IncidentDetail';
+import Chatbot from './components/Chatbot';
+import Login from './components/Login';
+import ProcessPanel from './components/ProcessPanel';
+import NetworkPanel from './components/NetworkPanel';
+import { RefreshCw, Clock } from 'lucide-react';
+import { api } from './api/client';
+
+export default function App() {
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('soc_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [selectedIncident, setSelectedIncident] = useState(null);
+  const [chatContextAlertId, setChatContextAlertId] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [alertCount, setAlertCount] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchAlertCount = async () => {
+      try {
+        const res = await api.getAlerts({ acknowledged: false });
+        if (Array.isArray(res.data)) {
+          setAlertCount(res.data.length);
+        }
+      } catch (err) {
+        console.error("Failed to fetch alert count:", err);
+      }
+    };
+    fetchAlertCount();
+    const interval = setInterval(fetchAlertCount, 10000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setUser(null);
+    };
+    window.addEventListener('soc_unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('soc_unauthorized', handleUnauthorized);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('soc_token');
+    localStorage.removeItem('soc_user');
+    setUser(null);
+  };
+
+  if (!user) {
+    return <Login onLoginSuccess={setUser} />;
+  }
+
+  const handleInvestigate = (incident) => {
+    setSelectedIncident(incident);
+  };
+
+  const handleAskAI = (incident) => {
+    setChatContextAlertId(incident.id);
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <Dashboard onSelectLog={setSelectedIncident} onInvestigate={handleInvestigate} />;
+      case 'processes':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">System Processes</h2>
+            <ProcessPanel />
+          </div>
+        );
+      case 'network':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Network Activity</h2>
+            <NetworkPanel />
+          </div>
+        );
+      case 'alerts':
+        return (
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6">Active Security Alerts</h2>
+            <AlertsPanel onInvestigate={handleInvestigate} />
+          </div>
+        );
+      case 'logs':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Comprehensive Log Stream</h2>
+            <LogFeed onSelectLog={setSelectedIncident} />
+          </div>
+        );
+      case 'chatbot':
+        return (
+          <div className="h-[calc(100vh-160px)] bg-soc-surface border border-soc-border rounded-2xl overflow-hidden flex flex-col items-center justify-center p-12 text-center">
+             <div className="w-20 h-20 bg-soc-purple/10 rounded-3xl flex items-center justify-center mb-6">
+                <RefreshCw className="w-10 h-10 text-soc-purple animate-spin-slow" />
+             </div>
+             <h2 className="text-2xl font-bold mb-2">AI Analyst Interface</h2>
+             <p className="text-soc-muted max-w-md">Use the floating assistant in the bottom right to interact with the CyberSOC AI analyst from any page.</p>
+          </div>
+        );
+      default:
+        return <Dashboard onSelectLog={setSelectedIncident} onInvestigate={handleInvestigate} />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-soc-bg text-soc-text flex dark">
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} alertCount={alertCount} />
+      
+      <main className="flex-1 ml-64 flex flex-col min-h-screen">
+        {/* Top Bar */}
+        <header className="h-16 border-b border-soc-border bg-soc-surface/50 backdrop-blur-md sticky top-0 z-40 px-8 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-bold capitalize">{activeTab}</h2>
+            <div className="h-4 w-px bg-soc-border" />
+            <div className="flex items-center gap-2 text-soc-muted text-sm font-mono">
+              <Clock className="w-4 h-4" />
+              {currentTime.toUTCString().replace('GMT', 'UTC')}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => window.location.reload()}
+              className="p-2 hover:bg-soc-border rounded-lg transition-colors text-soc-muted hover:text-soc-text"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-1.5 bg-soc-bg border border-soc-border rounded-lg text-xs font-bold text-soc-muted hover:text-soc-red hover:border-soc-red transition-all"
+            >
+              Logout
+            </button>
+            <div className="w-8 h-8 rounded-full bg-soc-blue/20 border border-soc-blue/40 flex items-center justify-center text-soc-blue font-bold text-xs">
+              {user.username.substring(0, 2).toUpperCase()}
+            </div>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="flex-1 p-8">
+          {renderContent()}
+        </div>
+      </main>
+
+      {/* Global Components */}
+      <IncidentDetail 
+        incident={selectedIncident} 
+        onClose={() => setSelectedIncident(null)} 
+        onAskAI={handleAskAI}
+      />
+      
+      <Chatbot 
+        contextAlertId={chatContextAlertId} 
+        onClearContext={() => setChatContextAlertId(null)} 
+      />
+    </div>
+  );
+}
+

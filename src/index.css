@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-soc-bg: #0d1117;
+  --color-soc-surface: #161b22;
+  --color-soc-border: #30363d;
+  --color-soc-text: #c9d1d9;
+  --color-soc-muted: #8b949e;
+  --color-soc-green: #3fb950;
+  --color-soc-yellow: #d29922;
+  --color-soc-red: #f85149;
+  --color-soc-blue: #58a6ff;
+  --color-soc-purple: #bc8cff;
+}
+
+@layer base {
+  body {
+    @apply bg-soc-bg text-soc-text font-sans;
+  }
+}
+
+.dark {
+  color-scheme: dark;
+}
+
