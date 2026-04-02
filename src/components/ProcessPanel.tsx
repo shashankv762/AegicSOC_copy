@@ -44,11 +44,11 @@ export default function ProcessPanel() {
                     <AlertTriangle className="w-3 h-3 text-soc-red" />
                   )}
                 </td>
-                <td className={`px-4 py-3 ${proc.cpu_percent > 50 ? 'text-soc-yellow' : 'text-soc-muted'}`}>
-                  {proc.cpu_percent.toFixed(1)}%
+                <td className={`px-4 py-3 ${(proc.cpu_percent || 0) > 50 ? 'text-soc-yellow' : 'text-soc-muted'}`}>
+                  {(proc.cpu_percent || 0).toFixed(1)}%
                 </td>
                 <td className="px-4 py-3 text-soc-muted">
-                  {proc.memory_usage.toFixed(1)}%
+                  {(proc.memory_usage || 0).toFixed(1)}%
                 </td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${

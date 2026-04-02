@@ -1,6 +1,47 @@
 import { db } from "../database.js";
+import { alertService } from "./alert_service.js";
+import { featureExtractor } from "../../ai/feature_extractor.js";
+import { anomalyDetector } from "../../ai/anomaly_detector.js";
+import { explainer } from "../../ai/explainer.js";
 
 export const logService = {
+  processAndSaveLog: async (logData: any) => {
+    // 1. Extract features
+    const features = featureExtractor.extract(logData);
+    
+    // 2. Predict anomaly
+    const [isAnomaly, score] = anomalyDetector.predict(features);
+    
+    // 3. Save log
+    const logId = logService.createLog({
+      ...logData,
+      is_anomaly: isAnomaly
+    });
+    
+    let alertId = null;
+    if (isAnomaly) {
+      // 4. Generate explanation and mitigations
+      const reason = explainer.explain(logData, score);
+      const mitigations = explainer.suggestMitigations(logData);
+      
+      // Assign severity
+      let severity = "Low";
+      if (score > 0.7) severity = "Critical";
+      else if (score > 0.4) severity = "Medium";
+      
+      // 5. Create alert
+      alertId = alertService.createAlert({
+        log_id: logId,
+        severity,
+        reason,
+        score,
+        mitigations
+      });
+    }
+    
+    return { log_id: logId, is_anomaly: isAnomaly, alert_id: alertId };
+  },
+
   createLog: (log: any) => {
     const stmt = db.prepare(`
       INSERT INTO logs (source_ip, event_type, username, status_code, payload, is_anomaly)
@@ -11,7 +52,7 @@ export const logService = {
       log.event_type,
       log.username,
       log.status_code,
-      JSON.stringify(log.payload),
+      JSON.stringify(log.payload || {}),
       log.is_anomaly ? 1 : 0
     );
     return info.lastInsertRowid;

@@ -10,6 +10,8 @@ import chatRoutes from "./src/backend/routes/chat.js";
 import authRoutes from "./src/backend/routes/auth.js";
 import systemRoutes from "./src/backend/routes/system.js";
 import { apiLimiter } from "./src/backend/middleware/rateLimit.js";
+import { logService } from "./src/backend/services/log_service.js";
+import { realSystemMonitor } from "./src/backend/services/real_system_monitor.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,10 +21,31 @@ async function startServer() {
   const PORT = 3000;
 
   // Trust proxy for rate limiting in Cloud Run/Proxied environments
-  app.set('trust proxy', true);
+  app.set('trust proxy', 1);
 
   app.use(cors());
   app.use(express.json());
+
+  // Middleware to log all incoming API requests
+  app.use("/api/", (req, res, next) => {
+    // Skip logging for high-frequency polling endpoints to avoid spam
+    if (!req.path.includes('/logs') && !req.path.includes('/system') && !req.path.includes('/alerts')) {
+      const sourceIp = req.ip || req.socket.remoteAddress || "unknown";
+      const userAgent = req.headers['user-agent'] || "unknown";
+      
+      // Log asynchronously
+      logService.processAndSaveLog({
+        timestamp: new Date().toISOString(),
+        source_ip: sourceIp,
+        username: "system",
+        event_type: "api_access",
+        status_code: 200,
+        payload: { method: req.method, path: req.path, user_agent: userAgent }
+      }).catch(console.error);
+    }
+    next();
+  });
+
   app.use("/api/", apiLimiter);
 
   // Initialize Database
@@ -57,14 +80,8 @@ async function startServer() {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
     
-    // Start log generator in development
-    if (process.env.NODE_ENV !== "production") {
-      import("./src/logs/generator.js").then(() => {
-        console.log("Log generator module loaded.");
-      }).catch(err => {
-        console.error("Failed to load log generator:", err);
-      });
-    }
+    // Start real system monitor
+    realSystemMonitor.start();
   });
 }
 
