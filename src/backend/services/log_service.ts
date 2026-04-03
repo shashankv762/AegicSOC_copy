@@ -58,11 +58,26 @@ export const logService = {
     return info.lastInsertRowid;
   },
 
-  getLogs: (limit = 100, offset = 0, anomalyOnly = false) => {
-    let query = "SELECT * FROM logs";
-    if (anomalyOnly) query += " WHERE is_anomaly = 1";
+  getLogs: (limit = 100, offset = 0, anomalyOnly = false, sourceIp?: string, username?: string) => {
+    let query = "SELECT * FROM logs WHERE 1=1";
+    const params: any[] = [];
+
+    if (anomalyOnly) {
+      query += " AND is_anomaly = 1";
+    }
+    if (sourceIp) {
+      query += " AND source_ip = ?";
+      params.push(sourceIp);
+    }
+    if (username) {
+      query += " AND username = ?";
+      params.push(username);
+    }
+
     query += " ORDER BY timestamp DESC LIMIT ? OFFSET ?";
-    return db.prepare(query).all(limit, offset);
+    params.push(limit, offset);
+
+    return db.prepare(query).all(...params);
   },
 
   getStats: () => {

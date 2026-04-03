@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Bell, List, MessageSquare, ShieldCheck, Activity, Globe, Cpu } from 'lucide-react';
+import { LayoutDashboard, Bell, List, MessageSquare, ShieldCheck, Activity, Globe, Cpu, SearchCode } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface SidebarProps {
@@ -15,6 +15,7 @@ export default function Sidebar({ activeTab, setActiveTab, alertCount }: Sidebar
     { id: 'network', label: 'Network', icon: Globe },
     { id: 'alerts', label: 'Alerts', icon: Bell, badge: alertCount },
     { id: 'logs', label: 'Logs', icon: List },
+    { id: 'forensics', label: 'Forensics', icon: SearchCode },
     { id: 'chatbot', label: 'Chatbot', icon: MessageSquare },
   ];
 

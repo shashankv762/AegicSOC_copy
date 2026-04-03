@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { X, ShieldAlert, Cpu, ListChecks, Code, MessageSquare } from 'lucide-react';
+import { X, ShieldAlert, Cpu, ListChecks, Code, MessageSquare, SearchCode } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface IncidentDetailProps {
   incident: any;
   onClose: () => void;
   onAskAI: (incident: any) => void;
+  onForensics?: (incident: any) => void;
 }
 
-export default function IncidentDetail({ incident, onClose, onAskAI }: IncidentDetailProps) {
+export default function IncidentDetail({ incident, onClose, onAskAI, onForensics }: IncidentDetailProps) {
   const [showPayload, setShowPayload] = useState(false);
 
   if (!incident) return null;
@@ -37,9 +38,20 @@ export default function IncidentDetail({ incident, onClose, onAskAI }: IncidentD
               <h2 className="text-xl font-bold">Incident #{incident.id}</h2>
               <span className="text-soc-muted text-sm">{new Date(incident.created_at || incident.timestamp).toLocaleString()}</span>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-soc-border rounded-full transition-colors">
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {onForensics && (
+                <button 
+                  onClick={() => onForensics(incident)} 
+                  className="flex items-center gap-2 px-3 py-1.5 bg-soc-blue/10 text-soc-blue hover:bg-soc-blue/20 rounded-lg text-xs font-bold transition-colors border border-soc-blue/30"
+                >
+                  <SearchCode className="w-4 h-4" />
+                  Forensics
+                </button>
+              )}
+              <button onClick={onClose} className="p-2 hover:bg-soc-border rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 space-y-8">

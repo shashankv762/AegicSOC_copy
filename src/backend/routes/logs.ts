@@ -20,8 +20,10 @@ router.get("/", authMiddleware, (req, res) => {
     const limit = parseInt(req.query.limit as string) || 100;
     const offset = parseInt(req.query.offset as string) || 0;
     const anomalyOnly = req.query.anomaly_only === 'true';
+    const sourceIp = req.query.source_ip as string;
+    const username = req.query.username as string;
     
-    const logs = logService.getLogs(limit, offset, anomalyOnly);
+    const logs = logService.getLogs(limit, offset, anomalyOnly, sourceIp, username);
     res.json(logs);
   } catch (error) {
     console.error("Error in GET /api/logs:", error);

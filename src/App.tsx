@@ -8,6 +8,7 @@ import Chatbot from './components/Chatbot';
 import Login from './components/Login';
 import ProcessPanel from './components/ProcessPanel';
 import NetworkPanel from './components/NetworkPanel';
+import ForensicsPanel from './components/ForensicsPanel';
 import { RefreshCw, Clock } from 'lucide-react';
 import { api } from './api/client';
 import { motion, AnimatePresence } from 'motion/react';
@@ -103,6 +104,8 @@ export default function App() {
             <LogFeed onSelectLog={setSelectedIncident} />
           </div>
         );
+      case 'forensics':
+        return <ForensicsPanel />;
       case 'chatbot':
         return (
           <div className="h-[calc(100vh-160px)] glass-panel rounded-2xl overflow-hidden flex flex-col items-center justify-center p-12 text-center relative">
@@ -183,6 +186,14 @@ export default function App() {
         incident={selectedIncident} 
         onClose={() => setSelectedIncident(null)} 
         onAskAI={handleAskAI}
+        onForensics={(incident) => {
+          setSelectedIncident(null);
+          setActiveTab('forensics');
+          // We can dispatch a custom event to trigger forensics search
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('soc_forensics_search', { detail: { type: 'source_ip', query: incident.source_ip } }));
+          }, 100);
+        }}
       />
       
       <Chatbot 
