@@ -1,14 +1,15 @@
 import React from 'react';
-import { LayoutDashboard, Bell, List, MessageSquare, ShieldCheck, Activity, Globe, Cpu, SearchCode } from 'lucide-react';
+import { LayoutDashboard, Bell, List, MessageSquare, ShieldCheck, Activity, Globe, Cpu, SearchCode, Users } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   alertCount: number;
+  userRole?: string;
 }
 
-export default function Sidebar({ activeTab, setActiveTab, alertCount }: SidebarProps) {
+export default function Sidebar({ activeTab, setActiveTab, alertCount, userRole }: SidebarProps) {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'processes', label: 'Processes', icon: Cpu },
@@ -18,6 +19,10 @@ export default function Sidebar({ activeTab, setActiveTab, alertCount }: Sidebar
     { id: 'forensics', label: 'Forensics', icon: SearchCode },
     { id: 'chatbot', label: 'Chatbot', icon: MessageSquare },
   ];
+
+  if (userRole === 'admin') {
+    menuItems.push({ id: 'users', label: 'Users', icon: Users });
+  }
 
   return (
     <div className="w-64 h-screen fixed left-0 top-0 glass-panel border-r border-soc-border/50 flex flex-col z-50">

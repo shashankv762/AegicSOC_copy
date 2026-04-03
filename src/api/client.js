@@ -47,5 +47,9 @@ export const api = {
   saveChatHistory: (role, content) => client.post('/chat/history', { role, content }),
   getProcesses: () => client.get('/system/processes'),
   getNetwork: () => client.get('/system/network'),
-  getHealth: () => client.get('/health')
+  getHealth: () => client.get('/health'),
+  getUsers: () => client.get('/users'),
+  createUser: (userData) => client.post('/users', userData),
+  updateUser: (id, userData) => client.put(`/users/${id}`, userData),
+  deleteUser: (id) => client.delete(`/users/${id}`)
 };

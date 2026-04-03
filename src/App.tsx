@@ -9,6 +9,7 @@ import Login from './components/Login';
 import ProcessPanel from './components/ProcessPanel';
 import NetworkPanel from './components/NetworkPanel';
 import ForensicsPanel from './components/ForensicsPanel';
+import UserManagement from './components/UserManagement';
 import { RefreshCw, Clock } from 'lucide-react';
 import { api } from './api/client';
 import { motion, AnimatePresence } from 'motion/react';
@@ -106,6 +107,8 @@ export default function App() {
         );
       case 'forensics':
         return <ForensicsPanel />;
+      case 'users':
+        return user.role === 'admin' ? <UserManagement /> : <div className="p-8 text-soc-red">Unauthorized</div>;
       case 'chatbot':
         return (
           <div className="h-[calc(100vh-160px)] glass-panel rounded-2xl overflow-hidden flex flex-col items-center justify-center p-12 text-center relative">
@@ -124,7 +127,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-soc-bg text-soc-text flex dark">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} alertCount={alertCount} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} alertCount={alertCount} userRole={user.role} />
       
       <main className="flex-1 ml-64 flex flex-col min-h-screen relative">
         {/* Top Bar */}

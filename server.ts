@@ -9,6 +9,7 @@ import alertRoutes from "./src/backend/routes/alerts.js";
 import chatRoutes from "./src/backend/routes/chat.js";
 import authRoutes from "./src/backend/routes/auth.js";
 import systemRoutes from "./src/backend/routes/system.js";
+import usersRoutes from "./src/backend/routes/users.js";
 import { apiLimiter } from "./src/backend/middleware/rateLimit.js";
 import { logService } from "./src/backend/services/log_service.js";
 import { alertService } from "./src/backend/services/alert_service.js";
@@ -58,6 +59,7 @@ async function startServer() {
   app.use("/api/alerts", alertRoutes);
   app.use("/api/chat", chatRoutes);
   app.use("/api/system", systemRoutes);
+  app.use("/api/users", usersRoutes);
 
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", model_ready: true });

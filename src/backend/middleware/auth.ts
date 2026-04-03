@@ -19,3 +19,12 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   (req as any).user = decoded;
   next();
 };
+
+export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const user = (req as any).user;
+  if (!user || user.role !== 'admin') {
+    console.warn(`Admin auth failed: User ${user?.username} attempted to access ${req.method} ${req.path}`);
+    return res.status(403).json({ error: 'Forbidden: Admin access required' });
+  }
+  next();
+};
