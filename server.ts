@@ -11,6 +11,7 @@ import authRoutes from "./src/backend/routes/auth.js";
 import systemRoutes from "./src/backend/routes/system.js";
 import { apiLimiter } from "./src/backend/middleware/rateLimit.js";
 import { logService } from "./src/backend/services/log_service.js";
+import { alertService } from "./src/backend/services/alert_service.js";
 import { realSystemMonitor } from "./src/backend/services/real_system_monitor.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -82,6 +83,15 @@ async function startServer() {
     
     // Start real system monitor
     realSystemMonitor.start();
+
+    // Start auto-acknowledge interval (every minute)
+    setInterval(() => {
+      try {
+        alertService.autoAcknowledgeAlerts();
+      } catch (err) {
+        console.error("Error running auto-acknowledge:", err);
+      }
+    }, 60000);
   });
 }
 

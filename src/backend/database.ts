@@ -107,6 +107,14 @@ export async function initDb() {
       )
     `);
 
+    // Settings Table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key VARCHAR(50) PRIMARY KEY,
+        value TEXT
+      )
+    `);
+
     // Seed admin user if not exists
     const adminExists = db.prepare("SELECT * FROM users WHERE username = 'admin'").get();
     if (!adminExists) {

@@ -1,5 +1,36 @@
 import { db } from "../database.js";
 
+export const settingsService = {
+  getSettings: () => {
+    const rows = db.prepare("SELECT key, value FROM settings").all() as {key: string, value: string}[];
+    const settings: Record<string, any> = {
+      auto_ack_enabled: false,
+      auto_ack_severity: 'Low',
+      auto_ack_delay_minutes: 60
+    };
+    
+    for (const row of rows) {
+      try {
+        settings[row.key] = JSON.parse(row.value);
+      } catch (e) {
+        settings[row.key] = row.value;
+      }
+    }
+    return settings;
+  },
+
+  updateSettings: (newSettings: Record<string, any>) => {
+    const stmt = db.prepare("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value");
+    const transaction = db.transaction((settings: Record<string, any>) => {
+      for (const [key, value] of Object.entries(settings)) {
+        stmt.run(key, JSON.stringify(value));
+      }
+    });
+    transaction(newSettings);
+    return settingsService.getSettings();
+  }
+};
+
 export const alertService = {
   createAlert: (alert: any) => {
     const stmt = db.prepare(`
@@ -64,5 +95,26 @@ export const alertService = {
   acknowledgeAlert: (id: number, acknowledged: boolean) => {
     db.prepare("UPDATE alerts SET acknowledged = ? WHERE id = ?").run(acknowledged ? 1 : 0, id);
     return alertService.getAlertById(id);
+  },
+
+  autoAcknowledgeAlerts: () => {
+    const settings = settingsService.getSettings();
+    if (!settings.auto_ack_enabled) return 0;
+
+    const delayMinutes = settings.auto_ack_delay_minutes || 60;
+    const severity = settings.auto_ack_severity || 'Low';
+
+    const info = db.prepare(`
+      UPDATE alerts 
+      SET acknowledged = 1 
+      WHERE acknowledged = 0 
+        AND severity = ? 
+        AND created_at <= datetime('now', ?)
+    `).run(severity, `-${delayMinutes} minutes`);
+
+    if (info.changes > 0) {
+      console.log(`Auto-acknowledged ${info.changes} alerts with severity ${severity} older than ${delayMinutes} minutes.`);
+    }
+    return info.changes;
   }
 };

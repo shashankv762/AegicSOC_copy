@@ -1,10 +1,28 @@
 import { Router } from "express";
-import { alertService } from "../services/alert_service.js";
+import { alertService, settingsService } from "../services/alert_service.js";
 import { authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 
 router.use(authMiddleware);
+
+router.get("/settings", (req, res) => {
+  try {
+    const settings = settingsService.getSettings();
+    res.json(settings);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get settings" });
+  }
+});
+
+router.post("/settings", (req, res) => {
+  try {
+    const settings = settingsService.updateSettings(req.body);
+    res.json(settings);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update settings" });
+  }
+});
 
 router.get("/", (req, res) => {
   try {
