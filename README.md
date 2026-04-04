@@ -51,22 +51,31 @@ CyberSOC is a real-time, AI-driven Security Operations Center (SOC) platform. Bu
    ```
 
 3. **Set up Firebase Configuration**
-   - Create a `firebase-applet-config.json` file in the root directory with your Firebase project configuration:
+   - Create a `firebase-applet-config.json` file in the root directory by copying the example file:
+   ```bash
+   cp firebase-applet-config.example.json firebase-applet-config.json
+   ```
+   - Open `firebase-applet-config.json` and replace the placeholder values with your own Firebase project configuration:
    ```json
    {
      "projectId": "your-project-id",
      "appId": "your-app-id",
-     "apiKey": "your-api-key",
+     "apiKey": "YOUR_FIREBASE_API_KEY",
      "authDomain": "your-auth-domain",
      "firestoreDatabaseId": "(default)"
    }
    ```
-   - Make sure to set up Firestore Security Rules using the provided `firestore.rules` file.
+   - Make sure to set up Firestore Security Rules in your Firebase console using the provided `firestore.rules` file.
 
-4. **Set up environment variables**
-   Copy the example environment file and configure your secrets:
+4. **Set up environment variables (Gemini API Key)**
+   - Copy the example environment file:
    ```bash
    cp .env.example .env
+   ```
+   - Open the `.env` file and add your personal **Gemini API Key** (required for the AI chatbot and anomaly explanations):
+   ```env
+   GEMINI_API_KEY="your_personal_gemini_api_key_here"
+   JWT_SECRET="your_custom_jwt_secret"
    ```
 
 5. **Run the development server**
