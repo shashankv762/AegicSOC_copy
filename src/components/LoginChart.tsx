@@ -16,12 +16,13 @@ export default function LoginChart() {
   });
 
   return (
-    <div className="bg-soc-surface border border-soc-border rounded-xl p-6 h-[400px] flex flex-col">
-      <h3 className="font-bold mb-6 text-soc-text">Login Activity — Last 24 Hours</h3>
+    <div className="glass-panel rounded-xl p-6 h-[400px] flex flex-col relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-soc-cyan to-soc-purple opacity-50"></div>
+      <h3 className="font-bold mb-6 text-soc-text font-syne">Login Activity — Last 24 Hours</h3>
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#30363d" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis 
               dataKey="name" 
               stroke="#8b949e" 
@@ -29,20 +30,22 @@ export default function LoginChart() {
               tickLine={false} 
               axisLine={false}
               interval={3}
+              fontFamily="DM Mono"
             />
             <YAxis 
               stroke="#8b949e" 
               fontSize={10} 
               tickLine={false} 
               axisLine={false}
+              fontFamily="DM Mono"
             />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#161b22', border: '1px solid #30363d', borderRadius: '8px' }}
-              itemStyle={{ fontSize: '12px' }}
+              contentStyle={{ backgroundColor: 'rgba(17, 21, 30, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(24, 29, 40, 0.8)', borderRadius: '8px' }}
+              itemStyle={{ fontSize: '12px', fontFamily: 'DM Mono' }}
             />
-            <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
-            <Bar dataKey="total" name="Total Logins" fill="#58a6ff" radius={[4, 4, 0, 0]} barSize={20} />
-            <Line dataKey="anomalies" name="Anomalies" stroke="#f85149" strokeWidth={2} dot={{ r: 3, fill: '#f85149' }} />
+            <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '20px', fontFamily: 'DM Sans' }} />
+            <Bar dataKey="total" name="Total Logins" fill="#00e5c0" radius={[4, 4, 0, 0]} barSize={20} />
+            <Line dataKey="anomalies" name="Anomalies" stroke="#ff4757" strokeWidth={2} dot={{ r: 3, fill: '#ff4757' }} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

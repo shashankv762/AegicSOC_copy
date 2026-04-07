@@ -158,8 +158,8 @@ export default function UserManagement() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-soc-text flex items-center gap-2">
-            <Users className="w-6 h-6 text-soc-blue" />
+          <h2 className="text-2xl font-bold text-soc-text flex items-center gap-2 font-syne">
+            <Users className="w-6 h-6 text-soc-cyan" />
             User Management
           </h2>
           <p className="text-soc-muted text-sm mt-1">Manage system access and roles (Firestore)</p>
@@ -190,7 +190,7 @@ export default function UserManagement() {
                     {user.photoURL ? (
                       <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-soc-blue/20 flex items-center justify-center text-soc-blue font-bold">
+                      <div className="w-8 h-8 rounded-full bg-soc-cyan/20 flex items-center justify-center text-soc-cyan font-bold">
                         {user.email?.charAt(0).toUpperCase() || 'U'}
                       </div>
                     )}
@@ -202,7 +202,7 @@ export default function UserManagement() {
                 </td>
                 <td className="px-6 py-4">
                   <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                    user.role === 'admin' ? 'bg-soc-red/10 text-soc-red' : 'bg-soc-blue/10 text-soc-blue'
+                    user.role === 'admin' ? 'bg-soc-red/10 text-soc-red' : 'bg-soc-cyan/10 text-soc-cyan'
                   }`}>
                     {user.role === 'admin' && <Shield className="w-3 h-3" />}
                     {user.role}
@@ -215,7 +215,7 @@ export default function UserManagement() {
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => handleOpenModal(user)}
-                      className="p-1.5 text-soc-muted hover:text-soc-blue hover:bg-soc-blue/10 rounded-lg transition-colors"
+                      className="p-1.5 text-soc-muted hover:text-soc-cyan hover:bg-soc-cyan/10 rounded-lg transition-colors"
                       title="Edit Role"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -287,8 +287,8 @@ export default function UserManagement() {
               className="bg-soc-surface border border-soc-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
             >
               <div className="p-4 border-b border-soc-border flex justify-between items-center bg-soc-bg/50">
-                <h3 className="font-bold flex items-center gap-2 text-soc-text">
-                  <Edit2 className="w-5 h-5 text-soc-blue" />
+                <h3 className="font-bold flex items-center gap-2 text-soc-text font-syne">
+                  <Edit2 className="w-5 h-5 text-soc-cyan" />
                   Edit User Role
                 </h3>
                 <button onClick={handleCloseModal} className="p-1 hover:bg-soc-border rounded-md transition-colors text-soc-muted">
@@ -302,7 +302,7 @@ export default function UserManagement() {
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ role: e.target.value })}
-                    className="w-full bg-soc-bg border border-soc-border rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-blue/50"
+                    className="w-full bg-soc-bg border border-soc-border rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-cyan/50 font-mono"
                   >
                     <option value="analyst">Analyst</option>
                     <option value="admin">Admin</option>
@@ -319,7 +319,7 @@ export default function UserManagement() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-bold bg-soc-blue text-white hover:bg-soc-blue/90 rounded-lg transition-colors flex items-center gap-2"
+                    className="px-4 py-2 text-sm font-bold bg-soc-cyan text-soc-bg hover:bg-soc-cyan/90 rounded-lg transition-colors flex items-center gap-2"
                   >
                     <Save className="w-4 h-4" />
                     Save Changes

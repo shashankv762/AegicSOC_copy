@@ -85,7 +85,7 @@ export default function IPSManagement() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-soc-text flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-soc-text flex items-center gap-2 font-syne">
             <ShieldAlert className="w-6 h-6 text-soc-red" />
             Intrusion Prevention System
           </h2>
@@ -117,7 +117,7 @@ export default function IPSManagement() {
               placeholder="Search blocked IPs or reasons..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-soc-bg border border-soc-border rounded-lg pl-9 pr-4 py-2 text-sm text-soc-text focus:outline-none focus:border-soc-blue/50"
+              className="w-full bg-soc-bg border border-soc-border rounded-lg pl-9 pr-4 py-2 text-sm text-soc-text focus:outline-none focus:border-soc-cyan/50"
             />
           </div>
           <div className="text-sm text-soc-muted font-mono">
@@ -188,7 +188,7 @@ export default function IPSManagement() {
               className="bg-soc-surface border border-soc-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
             >
               <div className="p-4 border-b border-soc-border flex justify-between items-center bg-soc-bg/50">
-                <h3 className="font-bold flex items-center gap-2 text-soc-text">
+                <h3 className="font-bold flex items-center gap-2 text-soc-text font-syne">
                   <ShieldCheck className="w-5 h-5 text-soc-green" />
                   Confirm Unblock
                 </h3>
@@ -232,7 +232,7 @@ export default function IPSManagement() {
               className="bg-soc-surface border border-soc-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
             >
               <div className="p-4 border-b border-soc-border flex justify-between items-center bg-soc-bg/50">
-                <h3 className="font-bold flex items-center gap-2 text-soc-text">
+                <h3 className="font-bold flex items-center gap-2 text-soc-text font-syne">
                   <ShieldAlert className="w-5 h-5 text-soc-red" />
                   Manually Block IP
                 </h3>

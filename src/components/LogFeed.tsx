@@ -36,21 +36,21 @@ export default function LogFeed({ onSelectLog }: LogFeedProps) {
 
   return (
     <div className="glass-panel rounded-2xl overflow-hidden flex flex-col h-full relative">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-soc-blue to-soc-purple opacity-50"></div>
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-soc-cyan to-soc-purple opacity-50"></div>
       
       <div className="p-4 border-b border-soc-border/50 flex justify-between items-center bg-soc-surface/50">
-        <h3 className="font-bold flex items-center gap-2 text-soc-text">
-          <Activity className="w-5 h-5 text-soc-blue" />
+        <h3 className="font-bold flex items-center gap-2 text-soc-text font-syne">
+          <Activity className="w-5 h-5 text-soc-cyan" />
           Live Log Stream
         </h3>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-xs font-mono text-soc-muted">
-            <span className="w-2 h-2 rounded-full bg-soc-green animate-pulse shadow-[0_0_8px_#10b981]"></span>
+            <span className="w-2 h-2 rounded-full bg-soc-cyan animate-pulse shadow-[0_0_8px_#00e5c0]"></span>
             {filteredLogs.length} EVENTS
           </div>
           <button 
             onClick={() => setShowFilters(!showFilters)}
-            className={`p-2 rounded-lg transition-all duration-300 ${showFilters ? 'bg-soc-blue/20 text-soc-blue neon-border-blue' : 'hover:bg-soc-surface/80 text-soc-muted hover:text-soc-blue'}`}
+            className={`p-2 rounded-lg transition-all duration-300 ${showFilters ? 'bg-soc-cyan/20 text-soc-cyan neon-border-cyan' : 'hover:bg-soc-surface/80 text-soc-muted hover:text-soc-cyan'}`}
           >
             <Filter className="w-4 h-4" />
           </button>
@@ -71,7 +71,7 @@ export default function LogFeed({ onSelectLog }: LogFeedProps) {
                 <select 
                   value={filterEventType} 
                   onChange={e => setFilterEventType(e.target.value)}
-                  className="bg-soc-surface/50 border border-soc-border/50 rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-blue/50 focus:ring-1 focus:ring-soc-blue/50 transition-all"
+                  className="bg-soc-surface/50 border border-soc-border/50 rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-cyan/50 focus:ring-1 focus:ring-soc-cyan/50 transition-all font-mono"
                 >
                   <option value="">All Types</option>
                   {uniqueEventTypes.map(type => (
@@ -87,7 +87,7 @@ export default function LogFeed({ onSelectLog }: LogFeedProps) {
                   placeholder="Filter by IP..."
                   value={filterSourceIp} 
                   onChange={e => setFilterSourceIp(e.target.value)}
-                  className="bg-soc-surface/50 border border-soc-border/50 rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-blue/50 focus:ring-1 focus:ring-soc-blue/50 transition-all"
+                  className="bg-soc-surface/50 border border-soc-border/50 rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-cyan/50 focus:ring-1 focus:ring-soc-cyan/50 transition-all font-mono"
                 />
               </div>
               
@@ -96,7 +96,7 @@ export default function LogFeed({ onSelectLog }: LogFeedProps) {
                 <select 
                   value={filterAnomaly} 
                   onChange={e => setFilterAnomaly(e.target.value)}
-                  className="bg-soc-surface/50 border border-soc-border/50 rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-blue/50 focus:ring-1 focus:ring-soc-blue/50 transition-all"
+                  className="bg-soc-surface/50 border border-soc-border/50 rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-cyan/50 focus:ring-1 focus:ring-soc-cyan/50 transition-all font-mono"
                 >
                   <option value="all">All Statuses</option>
                   <option value="anomaly">Anomaly Only</option>
@@ -145,13 +145,13 @@ export default function LogFeed({ onSelectLog }: LogFeedProps) {
                   key={log.id}
                   onClick={() => onSelectLog(log)}
                   className={`cursor-pointer transition-all duration-200 hover:bg-soc-surface/80 ${
-                    log.is_anomaly ? 'bg-soc-red/5 hover:bg-soc-red/10 border-l-2 border-soc-red' : 'border-l-2 border-transparent hover:border-soc-blue/50'
+                    log.is_anomaly ? 'bg-soc-red/5 hover:bg-soc-red/10 border-l-2 border-soc-red' : 'border-l-2 border-transparent hover:border-soc-cyan/50'
                   }`}
                 >
                   <td className="px-4 py-3 text-soc-muted whitespace-nowrap font-mono text-xs">
                     {new Date(log.timestamp).toLocaleTimeString()}
                   </td>
-                  <td className="px-4 py-3 font-mono text-soc-blue text-xs">{log.source_ip}</td>
+                  <td className="px-4 py-3 font-mono text-soc-cyan text-xs">{log.source_ip}</td>
                   <td className="px-4 py-3">
                     <span className="capitalize font-medium">{log.event_type.replace(/_/g, ' ')}</span>
                   </td>

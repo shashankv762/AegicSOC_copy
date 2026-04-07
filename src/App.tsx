@@ -11,7 +11,7 @@ import NetworkPanel from './components/NetworkPanel';
 import ForensicsPanel from './components/ForensicsPanel';
 import UserManagement from './components/UserManagement';
 import IPSManagement from './components/IPSManagement';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, MessageSquare, X } from 'lucide-react';
 import { api } from './api/client';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster, toast } from 'react-hot-toast';
@@ -19,6 +19,8 @@ import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
 
 import { ErrorBoundary } from './components/ErrorBoundary';
+
+import AegixLogo from './components/AegixLogo';
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -28,14 +30,30 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [chatContextData, setChatContextData] = useState(null);
+  const [isChatFloatingOpen, setIsChatFloatingOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [alertCount, setAlertCount] = useState(0);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const seenAlertIds = useRef(new Set());
 
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
       setIsAuthReady(true);
+      if (firebaseUser) {
+        // Sync local user state with Firebase if logged in
+        const saved = localStorage.getItem('soc_user');
+        const localUser = saved ? JSON.parse(saved) : null;
+        
+        if (localUser && localUser.id === firebaseUser.uid) {
+          setUser({
+            ...localUser,
+            photoURL: firebaseUser.photoURL,
+            displayName: firebaseUser.displayName || localUser.username
+          });
+        }
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -107,8 +125,8 @@ export default function App() {
     return (
       <div className="min-h-screen bg-soc-bg flex items-center justify-center dark">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-soc-blue/30 border-t-soc-blue rounded-full animate-spin"></div>
-          <div className="text-soc-blue font-mono text-sm uppercase tracking-widest animate-pulse">Initializing Secure Connection...</div>
+          <div className="w-12 h-12 border-4 border-soc-cyan/30 border-t-soc-cyan rounded-full animate-spin"></div>
+          <div className="text-soc-cyan font-mono text-sm uppercase tracking-widest animate-pulse">Initializing Secure Connection...</div>
         </div>
       </div>
     );
@@ -130,6 +148,7 @@ export default function App() {
     setChatContextData(incident);
     setSelectedIncident(null);
     setActiveTab('chatbot');
+    setIsChatFloatingOpen(false);
   };
 
   const renderContent = () => {
@@ -194,8 +213,8 @@ export default function App() {
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-bold capitalize tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-soc-text to-soc-muted">{activeTab}</h2>
             <div className="h-6 w-px bg-soc-border/50 hidden md:block" />
-            <div className="hidden md:flex items-center gap-2 text-soc-blue text-sm font-mono tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-soc-blue animate-pulse shadow-[0_0_8px_#0ea5e9]"></span>
+            <div className="hidden md:flex items-center gap-2 text-soc-cyan text-sm font-mono tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-soc-cyan animate-pulse shadow-[0_0_8px_#00e5c0]"></span>
               {currentTime.toUTCString().replace('GMT', 'UTC')}
             </div>
           </div>
@@ -203,25 +222,69 @@ export default function App() {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => window.location.reload()}
-              className="p-2 hover:bg-soc-surface/50 rounded-lg transition-colors text-soc-muted hover:text-soc-blue"
+              className="p-2 hover:bg-soc-surface/50 rounded-lg transition-colors text-soc-muted hover:text-soc-cyan"
             >
               <RefreshCw className="w-5 h-5" />
             </button>
             <div className="h-6 w-px bg-soc-border/50" />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 relative">
               <div className="text-right hidden md:block">
-                <div className="text-sm font-bold text-soc-text">{user.username}</div>
+                <div className="text-sm font-bold text-soc-text font-syne">{user.displayName || user.username}</div>
                 <div className="text-xs text-soc-muted font-mono uppercase">Role: {user.role || 'Analyst'}</div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-soc-blue/10 border border-soc-blue/40 flex items-center justify-center text-soc-blue font-bold shadow-[0_0_10px_rgba(14,165,233,0.2)]">
-                {user.username.substring(0, 2).toUpperCase()}
-              </div>
               <button 
-                onClick={handleLogout}
-                className="ml-2 px-3 py-1.5 bg-soc-red/10 border border-soc-red/30 rounded-lg text-xs font-bold text-soc-red hover:bg-soc-red/20 hover:border-soc-red/50 transition-all shadow-[0_0_10px_rgba(239,68,68,0.1)]"
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="w-10 h-10 rounded-full bg-soc-cyan/10 border border-soc-cyan/40 flex items-center justify-center text-soc-cyan font-bold shadow-[0_0_10px_rgba(0,229,192,0.2)] overflow-hidden hover:border-soc-cyan transition-colors focus:outline-none"
               >
-                Logout
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : (
+                  user.username.substring(0, 2).toUpperCase()
+                )}
               </button>
+
+              <AnimatePresence>
+                {isProfileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute top-14 right-0 w-64 glass-panel bg-soc-surface border border-soc-border rounded-xl shadow-2xl overflow-hidden z-50"
+                  >
+                    <div className="p-4 border-b border-soc-border bg-soc-bg/50">
+                      <div className="font-bold text-soc-text font-syne">{user.displayName || user.username}</div>
+                      <div className="text-xs text-soc-muted truncate">{user.email || 'No email provided'}</div>
+                      <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-soc-cyan/10 border border-soc-cyan/30 text-soc-cyan text-[10px] font-bold uppercase">
+                        {user.role || 'Analyst'}
+                      </div>
+                    </div>
+                    <div className="p-2">
+                      <button 
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          if (user.role === 'admin') {
+                            setActiveTab('users');
+                          } else {
+                            toast.error('You do not have permission to manage users.');
+                          }
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-soc-text hover:bg-soc-cyan/10 hover:text-soc-cyan rounded-lg transition-colors"
+                      >
+                        User Management
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          handleLogout();
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-soc-red hover:bg-soc-red/10 rounded-lg transition-colors mt-1"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </header>
@@ -259,6 +322,47 @@ export default function App() {
           }, 100);
         }}
       />
+
+      {/* Floating Chatbot */}
+      <AnimatePresence>
+        {isChatFloatingOpen && activeTab !== 'chatbot' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-24 right-8 w-96 h-[500px] z-50 shadow-2xl"
+          >
+            <Chatbot 
+              contextData={chatContextData} 
+              onClearContext={() => setChatContextData(null)} 
+              isFloating={true}
+              onClose={() => setIsChatFloatingOpen(false)}
+              autoSend={true}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* FAB */}
+      {activeTab !== 'chatbot' && (
+        <button
+          onClick={() => setIsChatFloatingOpen(!isChatFloatingOpen)}
+          className={`fixed bottom-8 right-8 w-14 h-14 rounded-full flex items-center justify-center z-50 transition-all duration-300 shadow-lg ${
+            isChatFloatingOpen 
+              ? 'bg-soc-red text-white rotate-90' 
+              : 'bg-soc-purple text-white hover:scale-110 shadow-[0_0_20px_rgba(139,92,246,0.5)]'
+          }`}
+        >
+          {isChatFloatingOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <div className="relative flex items-center justify-center w-full h-full">
+              <div className="absolute inset-0 bg-white blur-md opacity-20 rounded-full animate-pulse"></div>
+              <AegixLogo className="scale-[0.15] origin-center relative z-10" />
+            </div>
+          )}
+        </button>
+      )}
     </div>
   );
 }

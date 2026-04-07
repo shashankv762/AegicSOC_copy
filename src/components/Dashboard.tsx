@@ -18,10 +18,10 @@ export default function Dashboard({ onSelectLog, onInvestigate }: DashboardProps
   const { data: alerts } = usePolling(() => api.getAlerts({ limit: 5 }), 5000);
 
   const metricCards = [
-    { label: 'Total Logs Today', value: stats?.total_logs || 0, icon: Activity, color: 'text-soc-blue', border: 'border-soc-blue/30' },
-    { label: 'Active Processes', value: stats?.process_count || 0, icon: Target, color: 'text-soc-purple', border: 'border-soc-purple/30' },
-    { label: 'Network Conns', value: stats?.network_count || 0, icon: Activity, color: 'text-soc-blue', border: 'border-soc-blue/30' },
-    { label: 'Critical Alerts', value: (Array.isArray(alerts) ? alerts : [])?.filter(a => a.severity === 'Critical').length || 0, icon: ShieldAlert, color: 'text-soc-red', border: 'border-soc-red/30' },
+    { label: 'Total Logs Today', value: stats?.total_logs || 0, icon: Activity, color: 'text-soc-cyan', border: 'border-soc-cyan/30', trend: '+12%' },
+    { label: 'Active Processes', value: stats?.process_count || 0, icon: Target, color: 'text-soc-purple', border: 'border-soc-purple/30', trend: 'STABLE' },
+    { label: 'Network Conns', value: stats?.network_count || 0, icon: Activity, color: 'text-soc-cyan', border: 'border-soc-cyan/30', trend: 'ACTIVE' },
+    { label: 'Critical Alerts', value: (Array.isArray(alerts) ? alerts : [])?.filter(a => a.severity === 'Critical').length || 0, icon: ShieldAlert, color: 'text-soc-red', border: 'border-soc-red/30', trend: 'URGENT' },
   ];
 
   const pieData = stats?.events_per_type ? Object.entries(stats.events_per_type).map(([name, value]) => ({
@@ -29,7 +29,7 @@ export default function Dashboard({ onSelectLog, onInvestigate }: DashboardProps
     value
   })) : [];
 
-  const COLORS = ['#0ea5e9', '#8b5cf6', '#10b981', '#ef4444', '#eab308'];
+  const COLORS = ['#00e5c0', '#7f77dd', '#10b981', '#ff4757', '#ffb347'];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -54,14 +54,31 @@ export default function Dashboard({ onSelectLog, onInvestigate }: DashboardProps
       {/* Row 1: Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {metricCards.map((card, i) => (
-          <motion.div key={i} variants={itemVariants} className={`glass-panel p-5 rounded-xl border-t-2 ${card.border} hover:-translate-y-1 transition-transform duration-300`}>
+          <motion.div key={i} variants={itemVariants} className={`glass-panel p-5 rounded-xl border-t-2 ${card.border} hover:-translate-y-1 transition-transform duration-300 group`}>
             <div className="flex justify-between items-start mb-4">
-              <div className={`p-2.5 rounded-lg bg-soc-bg/50 border border-soc-border/50 ${card.color}`}>
+              <div className={`p-2.5 rounded-lg bg-soc-bg/50 border border-soc-border/50 ${card.color} group-hover:scale-110 transition-transform`}>
                 <card.icon className="w-5 h-5" />
               </div>
+              <div className={`text-[10px] font-bold px-2 py-0.5 rounded border ${card.border} ${card.color} bg-soc-bg/30`}>
+                {card.trend}
+              </div>
             </div>
-            <div className="text-3xl font-bold text-soc-text tracking-tight">{card.value}</div>
+            <div className="text-3xl font-bold text-soc-text font-syne tracking-tight flex items-baseline gap-2">
+              {card.value}
+              <span className="text-[10px] text-soc-muted font-mono uppercase tracking-tighter">Units</span>
+            </div>
             <div className="text-xs font-semibold text-soc-muted uppercase tracking-widest mt-1">{card.label}</div>
+            
+            {/* Technical detail line */}
+            <div className="mt-4 pt-3 border-t border-soc-border/30 flex justify-between items-center">
+              <div className="w-full h-1 bg-soc-border/20 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: '65%' }}
+                  className={`h-full bg-current ${card.color}`}
+                />
+              </div>
+            </div>
           </motion.div>
         ))}
       </div>
@@ -72,8 +89,8 @@ export default function Dashboard({ onSelectLog, onInvestigate }: DashboardProps
           <LoginChart />
         </motion.div>
         <motion.div variants={itemVariants} className="glass-panel rounded-xl p-6 min-h-[400px] flex flex-col relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-soc-purple to-soc-blue opacity-50"></div>
-          <h3 className="font-bold mb-6 text-soc-text flex items-center gap-2">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-soc-purple to-soc-cyan opacity-50"></div>
+          <h3 className="font-bold mb-6 text-soc-text flex items-center gap-2 font-syne">
             <PieChartIcon className="w-4 h-4 text-soc-purple" />
             Event Distribution
           </h3>
@@ -93,8 +110,8 @@ export default function Dashboard({ onSelectLog, onInvestigate }: DashboardProps
                   ))}
                 </Pie>
                 <RechartsTooltip 
-                  contentStyle={{ backgroundColor: 'rgba(10, 10, 15, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(30, 41, 59, 0.8)', borderRadius: '8px' }}
-                  itemStyle={{ color: '#f8fafc' }}
+                  contentStyle={{ backgroundColor: 'rgba(17, 21, 30, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(24, 29, 40, 0.8)', borderRadius: '8px' }}
+                  itemStyle={{ color: '#f3f4f6' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -116,7 +133,7 @@ export default function Dashboard({ onSelectLog, onInvestigate }: DashboardProps
           <LogFeed onSelectLog={onSelectLog} />
         </motion.div>
         <motion.div variants={itemVariants} className="space-y-4">
-          <h3 className="font-bold text-soc-text flex items-center gap-2 px-1">
+          <h3 className="font-bold text-soc-text flex items-center gap-2 px-1 font-syne">
             <Bell className="w-4 h-4 text-soc-yellow" />
             Recent Alerts
           </h3>

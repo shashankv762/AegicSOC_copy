@@ -44,25 +44,25 @@ export default function IncidentDetail({ incident, onClose, onAskAI, onForensics
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="bg-soc-surface border border-soc-border rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+          className="glass-panel bg-soc-surface border border-soc-border rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
         >
           {/* Header */}
           <div className="p-6 border-b border-soc-border flex justify-between items-center bg-soc-bg/50">
             <div className="flex items-center gap-4">
               <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
                 incident.severity === 'Critical' ? 'bg-soc-red/10 text-soc-red' : 
-                incident.severity === 'Medium' ? 'bg-soc-yellow/10 text-soc-yellow' : 'bg-soc-blue/10 text-soc-blue'
+                incident.severity === 'Medium' ? 'bg-soc-yellow/10 text-soc-yellow' : 'bg-soc-cyan/10 text-soc-cyan'
               }`}>
                 {incident.severity}
               </span>
-              <h2 className="text-xl font-bold">Incident #{incident.id}</h2>
+              <h2 className="text-xl font-bold font-syne">Incident #{incident.id}</h2>
               <span className="text-soc-muted text-sm">{new Date(incident.created_at || incident.timestamp).toLocaleString()}</span>
             </div>
             <div className="flex items-center gap-2">
               {onForensics && (
                 <button 
                   onClick={() => onForensics(incident)} 
-                  className="flex items-center gap-2 px-3 py-1.5 bg-soc-blue/10 text-soc-blue hover:bg-soc-blue/20 rounded-lg text-xs font-bold transition-colors border border-soc-blue/30"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-soc-cyan/10 text-soc-cyan hover:bg-soc-cyan/20 rounded-lg text-xs font-bold transition-colors border border-soc-cyan/30"
                 >
                   <SearchCode className="w-4 h-4" />
                   Forensics
@@ -92,7 +92,7 @@ export default function IncidentDetail({ incident, onClose, onAskAI, onForensics
                 ].map((item, i) => (
                   <div key={i} className="bg-soc-bg p-3 rounded-xl border border-soc-border">
                     <div className="text-[10px] text-soc-muted uppercase font-bold mb-1">{item.label}</div>
-                    <div className={`text-sm font-semibold ${item.mono ? 'font-mono text-soc-blue' : ''} ${item.capitalize ? 'capitalize' : ''}`}>
+                    <div className={`text-sm font-semibold ${item.mono ? 'font-mono text-soc-cyan' : ''} ${item.capitalize ? 'capitalize' : ''}`}>
                       {item.value}
                     </div>
                   </div>
@@ -107,16 +107,49 @@ export default function IncidentDetail({ incident, onClose, onAskAI, onForensics
                 AI Analysis
               </h3>
               <div className="bg-soc-bg p-5 rounded-xl border border-soc-border">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Anomaly Score</span>
-                  <span className="text-sm font-bold text-soc-red">{Math.round((incident.score || 0) * 100)}%</span>
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-sm font-bold text-soc-muted uppercase tracking-widest">Anomaly Score</span>
+                  <span className={`text-xl font-bold font-mono ${
+                    (incident.score || 0) > 0.8 ? 'text-soc-red drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 
+                    (incident.score || 0) > 0.5 ? 'text-soc-yellow drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]' : 
+                    'text-soc-cyan drop-shadow-[0_0_8px_rgba(0,229,192,0.8)]'
+                  }`}>
+                    {Math.round((incident.score || 0) * 100)}%
+                  </span>
                 </div>
-                <div className="w-full h-2 bg-soc-border rounded-full overflow-hidden mb-4">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(incident.score || 0) * 100}%` }}
-                    className={`h-full ${incident.severity === 'Critical' ? 'bg-soc-red' : 'bg-soc-yellow'}`}
-                  />
+                <div className="flex gap-1 h-3 w-full mb-6">
+                  {[...Array(10)].map((_, i) => {
+                    const threshold = (i + 1) * 10;
+                    const score = (incident.score || 0) * 100;
+                    const isActive = score >= threshold;
+                    
+                    let colorClass = 'bg-soc-border';
+                    let shadowClass = '';
+                    
+                    if (isActive) {
+                      if (score > 80) {
+                        colorClass = 'bg-soc-red';
+                        shadowClass = 'shadow-[0_0_10px_rgba(239,68,68,0.6)]';
+                      } else if (score > 50) {
+                        colorClass = 'bg-soc-yellow';
+                        shadowClass = 'shadow-[0_0_10px_rgba(234,179,8,0.6)]';
+                      } else {
+                        colorClass = 'bg-soc-cyan';
+                        shadowClass = 'shadow-[0_0_10px_rgba(0,229,192,0.6)]';
+                      }
+                    }
+
+                    return (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, scaleY: 0 }}
+                        animate={{ opacity: 1, scaleY: 1 }}
+                        transition={{ delay: i * 0.05 }}
+                        className={`flex-1 rounded-sm ${colorClass} ${shadowClass} transition-all duration-500`}
+                        style={{ opacity: isActive ? 1 : 0.2 }}
+                      />
+                    );
+                  })}
                 </div>
                 <p className="text-sm text-soc-text leading-relaxed">
                   {incident.reason || "Pattern analysis indicates unusual activity from this source. Multiple features deviate from baseline behavior."}
@@ -134,7 +167,7 @@ export default function IncidentDetail({ incident, onClose, onAskAI, onForensics
                 <div className="space-y-2">
                   {mitigations.map((step, i) => (
                     <div key={i} className="flex items-center gap-3 p-3 bg-soc-bg rounded-xl border border-soc-border">
-                      <div className="w-5 h-5 rounded-full bg-soc-blue/20 text-soc-blue flex items-center justify-center text-[10px] font-bold">
+                      <div className="w-5 h-5 rounded-full bg-soc-cyan/20 text-soc-cyan flex items-center justify-center text-[10px] font-bold">
                         {i + 1}
                       </div>
                       <span className="text-sm">{step}</span>

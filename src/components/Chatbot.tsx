@@ -1,32 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, Bot, User, X, Sparkles } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import Markdown from 'react-markdown';
 import { api } from '../api/client';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
+import AegixLogo from './AegixLogo';
 
 interface ChatbotProps {
   contextData: any;
   onClearContext: () => void;
   autoSend?: boolean;
+  isFloating?: boolean;
+  onClose?: () => void;
 }
 
-export default function Chatbot({ contextData, onClearContext, autoSend }: ChatbotProps) {
+export default function Chatbot({ contextData, onClearContext, autoSend, isFloating, onClose }: ChatbotProps) {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const scrollRef = useRef(null);
-  const hasAutoSent = useRef(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const lastProcessedIncidentId = useRef<string | number | null>(null);
 
   useEffect(() => {
     loadHistory();
   }, []);
 
   useEffect(() => {
-    if (contextData && autoSend && !hasAutoSent.current && !isLoading) {
-      hasAutoSent.current = true;
-      const prompt = `Please analyze this incident: ${JSON.stringify(contextData)}`;
-      handleSend(undefined, prompt);
+    if (contextData && autoSend && !isLoading) {
+      const incidentId = contextData.id || contextData.timestamp || JSON.stringify(contextData);
+      if (lastProcessedIncidentId.current !== incidentId) {
+        lastProcessedIncidentId.current = incidentId;
+        const prompt = `Please analyze this incident and explain everything about it in detail. Provide all the information about the alert, including what happened, the potential impact, and recommended mitigations.`;
+        handleSend(undefined, prompt);
+      }
     }
   }, [contextData, autoSend, isLoading]);
 
@@ -59,7 +65,11 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       // 1. Save user message to history
-      await api.saveChatHistory('user', userContent);
+      try {
+        await api.saveChatHistory('user', userContent);
+      } catch (e) {
+        console.error("Failed to save user message to history:", e);
+      }
 
       // 2. Get context if needed
       let contextDataToUse = contextData;
@@ -74,7 +84,7 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
       }
 
       // 3. Call Gemini
-      const systemPrompt = `You are CyberSOC, an expert AI security analyst assistant embedded in a Security Operations Center platform. You analyze log anomalies, explain attack patterns, and suggest mitigation strategies. Be concise, precise, and use security terminology correctly. Format responses in clear sections when explaining incidents. Never hallucinate IP addresses or usernames — only reference data provided to you. You can search historical chat data using the searchChatHistory tool to find relevant past conversations or analyses. You can also fetch recent alerts and alert details using the provided tools.`;
+      const systemPrompt = `You are AegixChain AI, an expert AI security analyst assistant embedded in a futuristic Security Operations Center platform. You analyze log anomalies, explain attack patterns, and suggest mitigation strategies. Be concise, precise, and use security terminology correctly. Format responses in clear sections when explaining incidents. Never hallucinate IP addresses or usernames — only reference data provided to you. You can search historical chat data using the searchChatHistory tool to find relevant past conversations or analyses. You can also fetch recent alerts, alert details, system logs, and network connection data using the provided tools. Analyzing network connections is crucial for identifying lateral movement or command-and-control activity.`;
 
       const searchChatHistoryFunctionDeclaration: FunctionDeclaration = {
         name: "searchChatHistory",
@@ -119,6 +129,20 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
         },
       };
 
+      const getRecentNetworkConnectionsFunctionDeclaration: FunctionDeclaration = {
+        name: "getRecentNetworkConnections",
+        description: "Get a list of recent network connections and active sockets.",
+        parameters: {
+          type: Type.OBJECT,
+          properties: {
+            limit: {
+              type: Type.NUMBER,
+              description: "The number of connections to retrieve (default 10).",
+            },
+          },
+        },
+      };
+
       const getAlertDetailsFunctionDeclaration: FunctionDeclaration = {
         name: "getAlertDetails",
         description: "Get detailed information and context for a specific alert ID.",
@@ -149,7 +173,13 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
         history: history,
         config: {
           systemInstruction: systemPrompt,
-          tools: [{ functionDeclarations: [searchChatHistoryFunctionDeclaration, getRecentAlertsFunctionDeclaration, getRecentLogsFunctionDeclaration, getAlertDetailsFunctionDeclaration] }],
+          tools: [{ functionDeclarations: [
+            searchChatHistoryFunctionDeclaration, 
+            getRecentAlertsFunctionDeclaration, 
+            getRecentLogsFunctionDeclaration, 
+            getRecentNetworkConnectionsFunctionDeclaration,
+            getAlertDetailsFunctionDeclaration
+          ] }],
         }
       });
 
@@ -175,6 +205,11 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
               const limit = (call.args.limit as number) || 10;
               const logsRes = await api.getLogs({ limit });
               functionResponseData = logsRes.data;
+            } else if (call.name === "getRecentNetworkConnections") {
+              const limit = (call.args.limit as number) || 10;
+              const networkRes = await api.getNetwork();
+              // Filter to limit if needed, though backend usually returns a reasonable set
+              functionResponseData = Array.isArray(networkRes.data) ? networkRes.data.slice(0, limit) : networkRes.data;
             } else if (call.name === "getAlertDetails") {
               const alertId = call.args.alertId as number;
               const contextRes = await api.getChatContext(alertId);
@@ -195,7 +230,7 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
 
         response = await chat.sendMessage({
           message: functionResponses
-        } as any);
+        });
         
         callCount++;
       }
@@ -210,7 +245,11 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
       }
 
       // 4. Save AI message to history
-      await api.saveChatHistory('assistant', aiContent);
+      try {
+        await api.saveChatHistory('assistant', aiContent);
+      } catch (e) {
+        console.error("Failed to save AI message to history:", e);
+      }
 
       const aiMsg = { role: 'assistant', content: aiContent, created_at: new Date().toISOString() };
       setChatHistory(prev => [...prev, aiMsg]);
@@ -220,7 +259,7 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
       console.error("Chat error:", err);
       setChatHistory(prev => [...prev, { 
         role: 'assistant', 
-        content: "Error: Failed to connect to CyberSOC AI. Please ensure your Gemini API key is configured correctly.", 
+        content: "Error: Failed to connect to AegixChain AI. Please ensure your Gemini API key is configured correctly.", 
         created_at: new Date().toISOString() 
       }]);
     } finally {
@@ -236,32 +275,37 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
   ];
 
   return (
-    <div className="h-[calc(100vh-120px)] w-full max-w-5xl mx-auto flex flex-col">
-      <div className="bg-soc-surface border border-soc-border rounded-2xl shadow-2xl flex flex-col flex-1 overflow-hidden">
+    <div className={`${isFloating ? 'h-full w-full' : 'h-[calc(100vh-120px)] w-full max-w-5xl mx-auto'} flex flex-col`}>
+      <div className={`glass-panel bg-soc-surface border border-soc-border ${isFloating ? 'rounded-xl' : 'rounded-2xl shadow-2xl'} flex flex-col flex-1 overflow-hidden`}>
         {/* Header */}
         <div className="p-4 bg-soc-purple/10 border-b border-soc-border flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-soc-purple rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.4)]">
-              <Bot className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-soc-bg rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(0,229,192,0.4)] overflow-hidden relative">
+              <AegixLogo className="scale-[0.15] origin-center" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-soc-text">CyberSOC AI Analyst</h3>
+              <h3 className="text-lg font-bold text-soc-text font-syne">AegixChain AI Analyst</h3>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-soc-green rounded-full animate-pulse shadow-[0_0_8px_#10b981]" />
-                <span className="text-xs text-soc-muted uppercase font-bold tracking-wider">Online & Ready</span>
+                <div className="w-2 h-2 bg-soc-cyan rounded-full animate-pulse shadow-[0_0_8px_#00e5c0]" />
+                <span className="text-xs text-soc-muted uppercase font-bold tracking-wider font-mono">Online & Ready</span>
               </div>
             </div>
           </div>
+          {onClose && (
+            <button onClick={onClose} className="p-2 hover:bg-soc-border rounded-full transition-colors text-soc-muted hover:text-soc-text">
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-soc-bg/30">
           {chatHistory.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-center p-6">
-              <div className="w-24 h-24 bg-soc-purple/10 rounded-3xl flex items-center justify-center mb-6 neon-border-blue">
-                <Sparkles className="w-12 h-12 text-soc-purple" />
+              <div className="w-32 h-32 flex items-center justify-center mb-6 relative">
+                <AegixLogo className="scale-[0.4] origin-center" />
               </div>
-              <h4 className="text-2xl font-bold text-soc-text mb-3">Welcome to CyberSOC AI</h4>
+              <h4 className="text-2xl font-bold text-soc-text mb-3 font-syne">Welcome to AegixChain AI</h4>
               <p className="text-soc-muted mb-8 max-w-md">I'm your advanced security analyst assistant. I can analyze alerts, search logs, and provide remediation steps.</p>
               <div className="grid grid-cols-2 gap-4 w-full max-w-2xl">
                 {starterPrompts.map((prompt, i) => (
@@ -279,18 +323,18 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
           {chatHistory.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`flex gap-4 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center shadow-md ${
-                  msg.role === 'user' ? 'bg-soc-blue' : 'bg-soc-surface border border-soc-border'
+                <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center shadow-md overflow-hidden relative ${
+                  msg.role === 'user' ? 'bg-soc-cyan' : 'bg-soc-surface border border-soc-border'
                 }`}>
-                  {msg.role === 'user' ? <User className="w-5 h-5 text-white" /> : <Bot className="w-5 h-5 text-soc-purple" />}
+                  {msg.role === 'user' ? <User className="w-5 h-5 text-soc-bg" /> : <AegixLogo className="scale-[0.15] origin-center" />}
                 </div>
                 <div className={`p-4 rounded-2xl text-sm shadow-sm ${
-                  msg.role === 'user' ? 'bg-soc-blue text-white rounded-tr-none' : 'bg-soc-surface border border-soc-border text-soc-text rounded-tl-none'
+                  msg.role === 'user' ? 'bg-soc-cyan text-soc-bg rounded-tr-none' : 'bg-soc-surface border border-soc-border text-soc-text rounded-tl-none'
                 }`}>
-                  <div className="prose prose-invert prose-sm max-w-none">
-                    <ReactMarkdown>
+                  <div className="markdown-body prose prose-invert prose-sm max-w-none">
+                    <Markdown>
                       {msg.content}
-                    </ReactMarkdown>
+                    </Markdown>
                   </div>
                 </div>
               </div>
@@ -299,8 +343,8 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
           {isLoading && (
             <div className="flex justify-start">
               <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-soc-surface border border-soc-border flex items-center justify-center shadow-md">
-                  <Bot className="w-5 h-5 text-soc-purple" />
+                <div className="w-10 h-10 rounded-xl bg-soc-surface border border-soc-border flex items-center justify-center shadow-md overflow-hidden relative">
+                  <AegixLogo className="scale-[0.15] origin-center" />
                 </div>
                 <div className="p-4 bg-soc-surface border border-soc-border rounded-2xl rounded-tl-none flex gap-2 items-center shadow-sm">
                   <div className="w-2 h-2 bg-soc-purple rounded-full animate-bounce" />
@@ -315,12 +359,12 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
         {/* Input */}
         <form onSubmit={handleSend} className="p-6 border-t border-soc-border bg-soc-surface">
           {contextData && (
-            <div className="mb-4 p-3 bg-soc-blue/10 border border-soc-blue/30 rounded-xl flex items-center justify-between shadow-sm">
+            <div className="mb-4 p-3 bg-soc-cyan/10 border border-soc-cyan/30 rounded-xl flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-soc-blue" />
-                <span className="text-xs font-bold text-soc-blue uppercase tracking-wider">Analyzing Context: {contextData.id ? `Alert #${contextData.id}` : 'Log Event'}</span>
+                <Sparkles className="w-4 h-4 text-soc-cyan" />
+                <span className="text-xs font-bold text-soc-cyan uppercase tracking-wider">Analyzing Context: {contextData.id ? `Alert #${contextData.id}` : 'Log Event'}</span>
               </div>
-              <button type="button" onClick={onClearContext} className="text-soc-blue hover:text-soc-red transition-colors p-1 rounded-md hover:bg-soc-red/10">
+              <button type="button" onClick={onClearContext} className="text-soc-cyan hover:text-soc-red transition-colors p-1 rounded-md hover:bg-soc-red/10">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -335,7 +379,7 @@ export default function Chatbot({ contextData, onClearContext, autoSend }: Chatb
                   handleSend();
                 }
               }}
-              placeholder="Ask CyberSOC AI..."
+              placeholder="Ask AegixChain AI..."
               className="w-full bg-soc-bg border border-soc-border rounded-xl py-4 pl-5 pr-14 text-sm focus:outline-none focus:border-soc-purple focus:ring-1 focus:ring-soc-purple transition-all resize-none h-14 shadow-inner"
             />
             <button

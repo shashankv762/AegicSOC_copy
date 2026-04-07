@@ -157,7 +157,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   return (
     <div className="min-h-screen bg-soc-bg flex items-center justify-center p-4 relative overflow-hidden dark">
       {/* Background Effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-soc-blue/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-soc-cyan/10 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-soc-purple/10 rounded-full blur-[100px] pointer-events-none"></div>
       
       <motion.div 
@@ -166,17 +166,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="glass-panel rounded-2xl p-8 relative overflow-hidden">
-          {/* Top accent line */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-soc-blue via-soc-purple to-soc-blue"></div>
+        <div className="bg-soc-border w-full max-w-md p-10 rounded-lg border border-soc-cyan/20 relative shadow-[0_0_30px_rgba(0,229,192,0.1)]">
           
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-soc-blue/10 rounded-2xl flex items-center justify-center mb-4 neon-border-blue relative">
-              <div className="absolute inset-0 bg-soc-blue/20 blur-md rounded-2xl"></div>
-              <ShieldCheck className="w-8 h-8 text-soc-blue relative z-10" />
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-soc-text to-soc-muted">CyberSOC</h1>
-            <p className="text-soc-muted mt-2 font-mono text-xs tracking-widest uppercase">Secure Authentication</p>
+            <h1 className="text-2xl font-bold font-syne text-white mb-6">AegixChain <span className="text-soc-cyan">Portal</span></h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -191,47 +184,34 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               </motion.div>
             )}
 
-            <div>
-              <label className="block text-xs font-bold text-soc-muted uppercase tracking-widest mb-2 ml-1">Username</label>
-              <div className="relative group">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-soc-muted group-focus-within:text-soc-blue transition-colors" />
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-soc-surface/50 border border-soc-border/50 rounded-xl py-3.5 pl-12 pr-4 text-soc-text focus:outline-none focus:border-soc-blue/50 focus:ring-1 focus:ring-soc-blue/50 transition-all"
-                  placeholder="admin"
-                />
-              </div>
+            <div className="mb-6">
+              <label className="block font-mono text-xs text-soc-muted mb-2">Access ID / Email</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="input-c"
+                placeholder="admin@domain.com"
+              />
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-soc-muted uppercase tracking-widest mb-2 ml-1">Password</label>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-soc-muted group-focus-within:text-soc-blue transition-colors" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-soc-surface/50 border border-soc-border/50 rounded-xl py-3.5 pl-12 pr-4 text-soc-text focus:outline-none focus:border-soc-blue/50 focus:ring-1 focus:ring-soc-blue/50 transition-all"
-                  placeholder="••••••••"
-                />
-              </div>
+            <div className="mb-6">
+              <label className="block font-mono text-xs text-soc-muted mb-2">Decryption Key</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-c"
+                placeholder="••••••••"
+              />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-soc-blue text-white font-bold rounded-xl hover:bg-soc-blue/90 transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(14,165,233,0.4)] flex items-center justify-center gap-2"
+              className="btn-primary w-full justify-center mt-2"
             >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  Initialize Session
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
+              {isLoading ? 'Authenticating...' : 'Authenticate'}
             </button>
           </form>
 
@@ -257,16 +237,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </button>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-soc-border/30 text-center">
-            <p className="text-xs text-soc-muted">
-              Default credentials: <span className="text-soc-text font-mono">admin / admin123</span>
+          <div className="mt-8 pt-6 border-t border-white/5 text-center">
+            <p className="text-xs text-soc-muted font-mono">
+              Protected by Layer-05 Quantum Encryption
             </p>
           </div>
         </div>
-
-        <p className="text-center text-[10px] text-soc-muted mt-8 uppercase tracking-widest">
-          Authorized Personnel Only • System Monitored
-        </p>
       </motion.div>
     </div>
   );

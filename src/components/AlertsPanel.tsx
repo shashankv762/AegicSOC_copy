@@ -81,8 +81,8 @@ export default function AlertsPanel({ onInvestigate }: AlertsPanelProps) {
               className="bg-soc-surface border border-soc-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
             >
               <div className="p-4 border-b border-soc-border flex justify-between items-center bg-soc-bg/50">
-                <h3 className="font-bold flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-soc-blue" />
+                <h3 className="font-bold flex items-center gap-2 font-syne">
+                  <Settings className="w-5 h-5 text-soc-cyan" />
                   Auto-Acknowledge Settings
                 </h3>
                 <button onClick={() => setShowSettings(false)} className="p-1 hover:bg-soc-border rounded-md transition-colors">
@@ -96,7 +96,7 @@ export default function AlertsPanel({ onInvestigate }: AlertsPanelProps) {
                     type="checkbox" 
                     checked={settings.auto_ack_enabled}
                     onChange={e => setSettings({...settings, auto_ack_enabled: e.target.checked})}
-                    className="w-4 h-4 accent-soc-blue"
+                    className="w-4 h-4 accent-soc-cyan"
                   />
                 </div>
                 
@@ -106,7 +106,7 @@ export default function AlertsPanel({ onInvestigate }: AlertsPanelProps) {
                     <select 
                       value={settings.auto_ack_severity}
                       onChange={e => setSettings({...settings, auto_ack_severity: e.target.value})}
-                      className="bg-soc-bg border border-soc-border rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-blue/50"
+                      className="bg-soc-bg border border-soc-border rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-cyan/50 font-mono"
                     >
                       <option value="Low">Low</option>
                       <option value="Medium">Medium</option>
@@ -121,7 +121,7 @@ export default function AlertsPanel({ onInvestigate }: AlertsPanelProps) {
                       min="1"
                       value={settings.auto_ack_delay_minutes}
                       onChange={e => setSettings({...settings, auto_ack_delay_minutes: parseInt(e.target.value) || 60})}
-                      className="bg-soc-bg border border-soc-border rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-blue/50"
+                      className="bg-soc-bg border border-soc-border rounded-xl px-3 py-2 text-sm text-soc-text outline-none focus:border-soc-cyan/50 font-mono"
                     />
                   </div>
                   <p className="text-xs text-soc-muted">
@@ -136,7 +136,7 @@ export default function AlertsPanel({ onInvestigate }: AlertsPanelProps) {
                 <button 
                   onClick={handleSaveSettings} 
                   disabled={saving}
-                  className="px-4 py-2 text-sm font-bold bg-soc-blue text-white hover:bg-soc-blue/90 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-bold bg-soc-cyan text-soc-bg hover:bg-soc-cyan/90 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
                 >
                   <Save className="w-4 h-4" />
                   {saving ? 'Saving...' : 'Save Settings'}
@@ -160,15 +160,15 @@ export default function AlertsPanel({ onInvestigate }: AlertsPanelProps) {
           {alerts.map((alert) => (
             <div
               key={alert.id}
-              className={`bg-soc-surface border border-soc-border rounded-xl p-4 transition-all hover:border-soc-muted border-l-4 ${
+              className={`glass-panel rounded-xl p-4 transition-all hover:border-soc-cyan/50 border-l-4 ${
                 alert.severity === 'Critical' ? 'border-l-soc-red' : 
-                alert.severity === 'Medium' ? 'border-l-soc-yellow' : 'border-l-soc-blue'
+                alert.severity === 'Medium' ? 'border-l-soc-yellow' : 'border-l-soc-cyan'
               }`}
             >
               <div className="flex justify-between items-start mb-2">
                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
                   alert.severity === 'Critical' ? 'bg-soc-red/10 text-soc-red' : 
-                  alert.severity === 'Medium' ? 'bg-soc-yellow/10 text-soc-yellow' : 'bg-soc-blue/10 text-soc-blue'
+                  alert.severity === 'Medium' ? 'bg-soc-yellow/10 text-soc-yellow' : 'bg-soc-cyan/10 text-soc-cyan'
                 }`}>
                   {alert.severity}
                 </span>
@@ -183,7 +183,7 @@ export default function AlertsPanel({ onInvestigate }: AlertsPanelProps) {
 
               <div className="flex flex-wrap gap-2 mb-3">
                 {alert.source_ip && (
-                  <span className="text-[10px] font-mono bg-soc-bg px-2 py-1 rounded border border-soc-border text-soc-blue">
+                  <span className="text-[10px] font-mono bg-soc-bg px-2 py-1 rounded border border-soc-border text-soc-cyan">
                     IP: {alert.source_ip}
                   </span>
                 )}
@@ -223,7 +223,7 @@ export default function AlertsPanel({ onInvestigate }: AlertsPanelProps) {
                 </button>
                 <button
                   onClick={() => onInvestigate(alert)}
-                  className="px-3 py-1.5 bg-soc-blue/10 hover:bg-soc-blue/20 text-soc-blue rounded-lg transition-colors"
+                  className="px-3 py-1.5 bg-soc-cyan/10 hover:bg-soc-cyan/20 text-soc-cyan rounded-lg transition-colors"
                 >
                   <Search className="w-4 h-4" />
                 </button>

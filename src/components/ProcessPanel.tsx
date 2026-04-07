@@ -53,63 +53,67 @@ export default function ProcessPanel() {
   if (loading && !processes) return <div className="p-8 text-center text-soc-muted">Loading processes...</div>;
 
   return (
-    <div className="bg-soc-surface border border-soc-border rounded-xl overflow-hidden flex flex-col h-full">
-      <div className="p-4 border-b border-soc-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="glass-panel rounded-2xl overflow-hidden flex flex-col h-full relative">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-soc-cyan to-soc-purple opacity-50"></div>
+      <div className="p-6 border-b border-soc-border/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-soc-bg/30">
         <div className="flex items-center justify-between w-full sm:w-auto">
-          <h3 className="font-bold flex items-center gap-2">
-            <Activity className="w-4 h-4 text-soc-purple" />
+          <h3 className="font-bold flex items-center gap-2 text-soc-text font-syne">
+            <Activity className="w-5 h-5 text-soc-purple" />
             System Processes
           </h3>
         </div>
         
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-soc-muted" />
+          <div className="relative flex-1 sm:w-72 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-soc-muted group-focus-within:text-soc-purple transition-colors" />
             <input
               type="text"
               placeholder="Search name, PID, or path..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-soc-bg border border-soc-border rounded-lg py-1.5 pl-9 pr-3 text-sm text-soc-text focus:outline-none focus:border-soc-purple/50"
+              className="w-full bg-soc-surface/50 border border-soc-border/50 rounded-xl py-2.5 pl-11 pr-4 text-sm text-soc-text focus:outline-none focus:border-soc-purple/50 focus:ring-1 focus:ring-soc-purple/50 transition-all font-mono"
             />
           </div>
-          <span className="text-xs text-soc-muted hidden sm:inline-block">Real-time Task Manager</span>
+          <div className="hidden sm:flex flex-col items-end">
+            <span className="text-[10px] font-bold text-soc-muted uppercase tracking-widest">Status</span>
+            <span className="text-xs text-soc-purple font-mono">LIVE MONITORING</span>
+          </div>
         </div>
       </div>
       <div className="overflow-x-auto overflow-y-auto flex-1 max-h-[500px]">
         <table className="w-full text-left text-sm">
-          <thead className="bg-soc-bg text-soc-muted sticky top-0 z-10">
+          <thead className="bg-soc-bg/80 backdrop-blur-md text-soc-muted sticky top-0 z-10 border-b border-soc-border/50">
             <tr>
-              <th className="px-4 py-3 font-medium cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('pid')}>
+              <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px] cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('pid')}>
                 <div className="flex items-center gap-1">PID <ArrowUpDown className="w-3 h-3 opacity-50" /></div>
               </th>
-              <th className="px-4 py-3 font-medium cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('name')}>
+              <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px] cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('name')}>
                 <div className="flex items-center gap-1">Name <ArrowUpDown className="w-3 h-3 opacity-50" /></div>
               </th>
-              <th className="px-4 py-3 font-medium cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('cpu_percent')}>
+              <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px] cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('cpu_percent')}>
                 <div className="flex items-center gap-1">CPU % <ArrowUpDown className="w-3 h-3 opacity-50" /></div>
               </th>
-              <th className="px-4 py-3 font-medium cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('memory_usage')}>
+              <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px] cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('memory_usage')}>
                 <div className="flex items-center gap-1">Memory % <ArrowUpDown className="w-3 h-3 opacity-50" /></div>
               </th>
-              <th className="px-4 py-3 font-medium cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('status')}>
+              <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px] cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('status')}>
                 <div className="flex items-center gap-1">Status <ArrowUpDown className="w-3 h-3 opacity-50" /></div>
               </th>
-              <th className="px-4 py-3 font-medium cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('exe_path')}>
+              <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px] cursor-pointer hover:text-soc-text transition-colors" onClick={() => handleSort('exe_path')}>
                 <div className="flex items-center gap-1">Path <ArrowUpDown className="w-3 h-3 opacity-50" /></div>
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-soc-border">
+          <tbody className="divide-y divide-soc-border/30">
             {filteredAndSortedProcesses.map((proc: any) => (
               <tr
                 key={proc.id}
-                className={`transition-colors hover:bg-soc-bg/50 ${
+                className={`transition-all hover:bg-soc-purple/5 group ${
                   proc.is_suspicious ? 'bg-soc-red/5' : ''
                 }`}
               >
-                <td className="px-4 py-3 font-mono text-soc-blue">{proc.pid}</td>
-                <td className="px-4 py-3 font-medium flex items-center gap-2">
+                <td className="px-6 py-4 font-mono text-soc-cyan">{proc.pid}</td>
+                <td className="px-6 py-4 font-medium flex items-center gap-2">
                   {proc.name}
                   {proc.status && proc.status !== 'Running' && (
                     <span className="text-soc-muted text-xs font-normal">({proc.status})</span>
@@ -118,20 +122,20 @@ export default function ProcessPanel() {
                     <AlertTriangle className="w-3 h-3 text-soc-red" />
                   )}
                 </td>
-                <td className={`px-4 py-3 ${(proc.cpu_percent || 0) > 50 ? 'text-soc-yellow' : 'text-soc-muted'}`}>
+                <td className={`px-6 py-4 ${(proc.cpu_percent || 0) > 50 ? 'text-soc-yellow' : 'text-soc-muted'}`}>
                   {(proc.cpu_percent || 0).toFixed(1)}%
                 </td>
-                <td className="px-4 py-3 text-soc-muted">
+                <td className="px-6 py-4 text-soc-muted">
                   {(proc.memory_usage || 0).toFixed(1)}%
                 </td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                    proc.status === 'Running' ? 'bg-soc-green/10 text-soc-green' : 'bg-soc-muted/10 text-soc-muted'
+                <td className="px-6 py-4">
+                  <span className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase tracking-tight ${
+                    proc.status === 'Running' ? 'border-soc-green/30 bg-soc-green/10 text-soc-green' : 'border-soc-muted/30 bg-soc-muted/10 text-soc-muted'
                   }`}>
                     {proc.status}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-xs text-soc-muted truncate max-w-[200px]" title={proc.exe_path}>
+                <td className="px-6 py-4 text-xs text-soc-muted truncate max-w-[200px]" title={proc.exe_path}>
                   {proc.exe_path}
                 </td>
               </tr>

@@ -86,33 +86,33 @@ export default function ForensicsPanel() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-soc-text to-soc-muted">
+      <h2 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-soc-cyan to-soc-purple font-syne">
         Forensics & Deep Analysis
       </h2>
 
       {/* Search Bar */}
       <div className="glass-panel rounded-2xl p-6 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-soc-blue via-soc-purple to-soc-blue opacity-50"></div>
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-soc-cyan via-soc-purple to-soc-cyan opacity-50"></div>
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1 w-full">
-            <label className="block text-xs font-bold text-soc-muted uppercase tracking-widest mb-2 ml-1">Search Query</label>
+            <label className="block text-xs font-bold text-soc-muted uppercase tracking-widest mb-2 ml-1 font-mono">Search Query</label>
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-soc-muted group-focus-within:text-soc-blue transition-colors" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-soc-muted group-focus-within:text-soc-cyan transition-colors" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={searchType === 'source_ip' ? "Enter IP address (e.g., 192.168.1.100)" : "Enter username (e.g., admin)"}
-                className="w-full bg-soc-surface/50 border border-soc-border/50 rounded-xl py-3 pl-12 pr-4 text-soc-text focus:outline-none focus:border-soc-blue/50 focus:ring-1 focus:ring-soc-blue/50 transition-all"
+                className="w-full bg-soc-surface/50 border border-soc-border/50 rounded-xl py-3 pl-12 pr-4 text-soc-text focus:outline-none focus:border-soc-cyan/50 focus:ring-1 focus:ring-soc-cyan/50 transition-all font-mono"
               />
             </div>
           </div>
           <div className="w-full md:w-48">
-            <label className="block text-xs font-bold text-soc-muted uppercase tracking-widest mb-2 ml-1">Search By</label>
+            <label className="block text-xs font-bold text-soc-muted uppercase tracking-widest mb-2 ml-1 font-mono">Search By</label>
             <select
               value={searchType}
               onChange={(e) => setSearchType(e.target.value)}
-              className="w-full bg-soc-surface/50 border border-soc-border/50 rounded-xl py-3 px-4 text-soc-text focus:outline-none focus:border-soc-blue/50 focus:ring-1 focus:ring-soc-blue/50 transition-all"
+              className="w-full bg-soc-surface/50 border border-soc-border/50 rounded-xl py-3 px-4 text-soc-text focus:outline-none focus:border-soc-cyan/50 focus:ring-1 focus:ring-soc-cyan/50 transition-all font-mono"
             >
               <option value="source_ip">Source IP</option>
               <option value="username">Username</option>
@@ -121,7 +121,7 @@ export default function ForensicsPanel() {
           <button
             type="submit"
             disabled={loading || !query.trim()}
-            className="w-full md:w-auto py-3 px-8 bg-soc-blue text-white font-bold rounded-xl hover:bg-soc-blue/90 transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(14,165,233,0.4)]"
+            className="w-full md:w-auto py-3 px-8 bg-soc-cyan text-soc-bg font-bold rounded-xl hover:bg-soc-cyan/90 transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(0,229,192,0.4)] font-syne"
           >
             {loading ? 'Searching...' : 'Analyze'}
           </button>
@@ -138,9 +138,9 @@ export default function ForensicsPanel() {
           >
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="glass-panel p-5 rounded-xl border-l-4 border-l-soc-blue flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-soc-blue/10 flex items-center justify-center">
-                  <Database className="w-6 h-6 text-soc-blue" />
+              <div className="glass-panel p-5 rounded-xl border-l-4 border-l-soc-cyan flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-soc-cyan/10 flex items-center justify-center">
+                  <Database className="w-6 h-6 text-soc-cyan" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-soc-muted uppercase tracking-widest">Total Events</div>
@@ -173,7 +173,7 @@ export default function ForensicsPanel() {
 
             {/* Timeline View */}
             <div className="glass-panel rounded-2xl p-6">
-              <h3 className="font-bold flex items-center gap-2 text-soc-text mb-6">
+              <h3 className="font-bold flex items-center gap-2 text-soc-text mb-6 font-syne">
                 <Clock className="w-5 h-5 text-soc-purple" />
                 Event Timeline
               </h3>
@@ -190,7 +190,7 @@ export default function ForensicsPanel() {
                     >
                       {/* Timeline Dot */}
                       <div className={`absolute -left-[9px] top-1.5 w-4 h-4 rounded-full border-2 border-soc-bg ${
-                        log.is_anomaly ? 'bg-soc-red shadow-[0_0_10px_rgba(239,68,68,0.6)]' : 'bg-soc-blue shadow-[0_0_10px_rgba(14,165,233,0.4)]'
+                        log.is_anomaly ? 'bg-soc-red shadow-[0_0_10px_rgba(239,68,68,0.6)]' : 'bg-soc-cyan shadow-[0_0_10px_rgba(0,229,192,0.4)]'
                       }`} />
                       
                       <div className={`p-4 rounded-xl border ${
@@ -202,7 +202,7 @@ export default function ForensicsPanel() {
                               {new Date(log.timestamp).toLocaleString()}
                             </span>
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                              log.is_anomaly ? 'bg-soc-red/20 text-soc-red' : 'bg-soc-blue/20 text-soc-blue'
+                              log.is_anomaly ? 'bg-soc-red/20 text-soc-red' : 'bg-soc-cyan/20 text-soc-cyan'
                             }`}>
                               {log.event_type.replace(/_/g, ' ')}
                             </span>

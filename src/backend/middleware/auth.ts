@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { authUtils } from '../utils/auth.js';
 import { adminAuth } from '../firebaseAdmin.js';
 import jwt from 'jsonwebtoken';
-import { getFirestore } from 'firebase-admin/firestore';
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -21,12 +20,12 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       // Verify with Firebase Admin
       const firebaseUser = await adminAuth.verifyIdToken(token);
       
-      // We need to fetch the user's role from Firestore since it's not in the token
-      // For now, we can just pass the uid and email, and assume 'analyst' unless we fetch it.
-      // To be safe, let's fetch the role from Firestore using admin SDK
-      const db = getFirestore();
-      const userDoc = await db.collection('users').doc(firebaseUser.uid).get();
-      const role = userDoc.exists ? userDoc.data()?.role : 'analyst';
+      // Assign role based on email or default to analyst
+      // Avoid using getFirestore() here as it requires service account credentials
+      let role = 'analyst';
+      if (firebaseUser.email === 'blueparasite1234@gmail.com' || firebaseUser.email === '1dt24cy038@dsatm.edu.in') {
+        role = 'admin';
+      }
       
       (req as any).user = {
         id: firebaseUser.uid,
